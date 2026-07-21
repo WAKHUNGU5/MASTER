@@ -159,6 +159,7 @@
             border-radius: 8px;
             padding: 20px;
             transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
         .data-card:hover {
             transform: translateY(-5px);
@@ -173,6 +174,65 @@
             color: #555;
             font-size: 14px;
             line-height: 1.6;
+        }
+        
+        /* Video Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-btn:hover {
+            color: #000;
+        }
+        .video-player {
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: block;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 16px;
+        }
+        .error-message {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
         .category-section {
             margin-bottom: 40px;
@@ -249,11 +309,8 @@
 
         <!-- Music Section -->
         <div class="category-section">
-            <h2 class="category-title">🎵 Young Tembo Music</h2>
+            <h2 class="category-title">🎵 Trending Music & Young Tembo</h2>
             <div class="data-grid" id="musicGrid"></div>
-            <h2>Artist:koma song</h2>
-            <video src="https://youtu.be/GpMHD6X3fj4?si=ghnRnWDkywZyv3AS" controls autoplay muted loop playsinline preload="auto"></video>
-            <video src="https://youtu.be/ZjdL5uPAXq0?si=ljBQBkCZ2jlMVkyy" controls autoplay muted loop playsinline preload="auto"></video>
         </div>
 
         <!-- Games Section -->
@@ -269,44 +326,29 @@
         </div>
     </div>
 
+    <!-- Video Modal -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeVideoModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <iframe id="videoFrame" class="video-player" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p id="modalDesc"></p>
+        </div>
+    </div>
+
     <script>
-        // Sample data
-        const entertainmentData = {
-            movies: [
-                { title: "The Quantum Quest", desc: "An epic sci-fi adventure about students solving a cosmic mystery." },
-                { title: "Laughter Labs", desc: "A hilarious comedy about school life and friendship." },
-                { title: "Beat Drop", desc: "A music-driven drama featuring talented students." },
-                { title: "Mystery Manor", desc: "An exciting thriller with unexpected twists." }
-            ],
-            music: [
-                { title: "Student Vibes", artist: "Young Tembo", desc: "Mke wangu nimlevi full song." },
-                { title: "Digital Dreams", artist: "Young Tembo", desc: "mama niombee song." },
-                { title: "Chilled Moments", artist: "Young Tembo", desc: "Are you happy now song." },
-                { title: "Remix Reality", artist: "DJ byka 254", desc: "Khuminya finest." }
-            ],
-            games: [
-                { title: "Code Quest", desc: "Learn coding through an interactive adventure game." },
-                { title: "Math Battles", desc: "Compete with friends in math challenges." },
-                { title: "Brain Puzzles", desc: "Test your logic with engaging puzzle games." },
-                { title: "Trivia Champion", desc: "Challenge your knowledge across multiple topics." }
-            ],
-            events: [
-                { title: "Gaming Tournament", date: "May 15, 2024", desc: "School-wide esports competition." },
-                { title: "Talent Show", date: "May 22, 2024", desc: "Showcase your talents on stage." },
-                { title: "Movie Night", date: "May 29, 2024", desc: "Free screening of latest student-picked film." },
-                { title: "Music Festival", date: "June 5, 2024", desc: "Live performances by student bands." }
-            ]
+        const API_URL = 'http://localhost:3000/api';
+        
+        let currentUser = null;
+        let entertainmentData = {
+            movies: [],
+            music: [],
+            games: [],
+            events: []
         };
 
-        // Sample users (in real app, this would be a backend)
-        const users = [
-            { username: "student1", password: "pass123", email: "student1@school.edu" },
-            { username: "student2", password: "pass456", email: "student2@school.edu" },
-            { username: "demo", password: "demo", email: "demo@school.edu" }
-        ];
-
-        let currentUser = null;
-
+        // ==================== UI Functions ====================
+        
         function toggleForms() {
             document.getElementById('loginForm').classList.toggle('hidden');
             document.getElementById('registerForm').classList.toggle('hidden');
@@ -324,7 +366,9 @@
             errorEl.style.display = 'block';
         }
 
-        function handleLogin() {
+        // ==================== API Functions ====================
+
+        async function handleLogin() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
 
@@ -333,17 +377,29 @@
                 return;
             }
 
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                currentUser = user;
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showError('login', error.error || 'Login failed');
+                    return;
+                }
+
+                const data = await response.json();
+                currentUser = data.user;
                 showDashboard();
-            } else {
-                showError('login', 'Invalid username or password. Try: demo/demo');
+            } catch (err) {
+                showError('login', 'Connection error. Make sure backend is running on localhost:3000');
+                console.error('Login error:', err);
             }
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
@@ -353,14 +409,103 @@
                 return;
             }
 
-            if (users.some(u => u.username === username)) {
-                showError('register', 'Username already exists. Choose another.');
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showError('register', error.error || 'Registration failed');
+                    return;
+                }
+
+                const data = await response.json();
+                currentUser = data.user;
+                showDashboard();
+            } catch (err) {
+                showError('register', 'Connection error. Make sure backend is running on localhost:3000');
+                console.error('Register error:', err);
+            }
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_URL}/entertainment`);
+                if (!response.ok) throw new Error('Failed to load data');
+                entertainmentData = await response.json();
+                
+                loadGrid('moviesGrid', entertainmentData.movies, 'movie');
+                loadGrid('musicGrid', entertainmentData.music, 'music');
+                loadGrid('gamesGrid', entertainmentData.games, 'game');
+                loadGrid('eventsGrid', entertainmentData.events, 'event');
+            } catch (err) {
+                console.error('Error loading data:', err);
+                showErrorMessage('Could not load entertainment data. Make sure backend is running.');
+            }
+        }
+
+        function loadGrid(gridId, items, type) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            
+            if (items.length === 0) {
+                grid.innerHTML = '<p>No items available</p>';
                 return;
             }
 
-            users.push({ username, password, email });
-            currentUser = { username, email };
-            showDashboard();
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'data-card';
+                
+                let content = `<h3>${item.title}</h3>`;
+                
+                if (type === 'movie') {
+                    content += `<p>${item.desc}</p><p><strong>Genre:</strong> ${item.genre}</p>`;
+                    card.onclick = () => openVideoModal(item.title, item.videoId, item.desc);
+                } else if (type === 'music') {
+                    content += `<p><strong>Artist:</strong> ${item.artist}</p><p>${item.desc}</p><p><strong>Duration:</strong> ${item.duration}</p>`;
+                    card.onclick = () => openVideoModal(item.title, item.videoId, item.desc);
+                } else if (type === 'game') {
+                    content += `<p>${item.desc}</p><p><strong>Category:</strong> ${item.category}</p><p>⭐ ${item.rating}</p>`;
+                } else if (type === 'event') {
+                    content += `<p>${item.desc}</p><p><strong>Date:</strong> ${item.date}</p><p><strong>Time:</strong> ${item.time}</p><p><strong>Location:</strong> ${item.location}</p>`;
+                }
+                
+                card.innerHTML = content;
+                grid.appendChild(card);
+            });
+        }
+
+        function openVideoModal(title, videoId, desc) {
+            if (!videoId) return;
+            
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').textContent = desc;
+            
+            // Embed YouTube video
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            document.getElementById('videoFrame').src = embedUrl;
+            
+            document.getElementById('videoModal').style.display = 'block';
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoFrame').src = '';
+        }
+
+        function showErrorMessage(message) {
+            const container = document.getElementById('loginContainer');
+            if (!document.getElementById('errorAlert')) {
+                const errorDiv = document.createElement('div');
+                errorDiv.id = 'errorAlert';
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                container.insertBefore(errorDiv, container.firstChild);
+            }
         }
 
         function showDashboard() {
@@ -368,27 +513,6 @@
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('displayUsername').textContent = currentUser.username;
             loadData();
-        }
-
-        function loadData() {
-            loadGrid('moviesGrid', entertainmentData.movies);
-            loadGrid('musicGrid', entertainmentData.music);
-            loadGrid('gamesGrid', entertainmentData.games);
-            loadGrid('eventsGrid', entertainmentData.events);
-        }
-
-        function loadGrid(gridId, items) {
-            const grid = document.getElementById(gridId);
-            grid.innerHTML = '';
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'data-card';
-                card.innerHTML = `
-                    <h3>${item.title}</h3>
-                    <p>${item.desc || (item.artist ? 'Artist: ' + item.artist : '')}${item.date ? '<br><strong>Date:</strong> ' + item.date : ''}</p>
-                `;
-                grid.appendChild(card);
-            });
         }
 
         function handleLogout() {
@@ -402,9 +526,21 @@
             clearErrors();
         }
 
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('videoModal');
+            if (event.target == modal) {
+                closeVideoModal();
+            }
+        }
+
         // Test credentials hint on load
         window.addEventListener('load', () => {
-            console.log('Test login - Username: demo, Password: demo');
+            console.log('🎬 School Entertainment System');
+            console.log('📝 Test Credentials:');
+            console.log('   Username: demo');
+            console.log('   Password: demo');
+            console.log('🔌 Make sure backend is running: npm start');
         });
     </script>
 </body>

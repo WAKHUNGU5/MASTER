@@ -1,0 +1,150 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "student1",
+      "password": "pass123",
+      "email": "student1@school.edu"
+    },
+    {
+      "id": 2,
+      "username": "student2",
+      "password": "pass456",
+      "email": "student2@school.edu"
+    },
+    {
+      "id": 3,
+      "username": "demo",
+      "password": "demo",
+      "email": "demo@school.edu"
+    }
+  ],
+  "movies": [
+    {
+      "id": 1,
+      "title": "The Quantum Quest",
+      "desc": "An epic sci-fi adventure about students solving a cosmic mystery.",
+      "videoId": "jNQXAC9IVRw",
+      "genre": "Sci-Fi"
+    },
+    {
+      "id": 2,
+      "title": "Laughter Labs",
+      "desc": "A hilarious comedy about school life and friendship.",
+      "videoId": "dQw4w9WgXcQ",
+      "genre": "Comedy"
+    },
+    {
+      "id": 3,
+      "title": "Beat Drop",
+      "desc": "A music-driven drama featuring talented students.",
+      "videoId": "9bZkp7q19f0",
+      "genre": "Drama"
+    },
+    {
+      "id": 4,
+      "title": "Mystery Manor",
+      "desc": "An exciting thriller with unexpected twists.",
+      "videoId": "kJQDxksxP3A",
+      "genre": "Thriller"
+    }
+  ],
+  "music": [
+    {
+      "id": 1,
+      "title": "Student Vibes",
+      "artist": "Local Band",
+      "desc": "Feel-good anthem by your classmates.",
+      "videoId": "aqz-KE-bpKQ",
+      "duration": "3:45"
+    },
+    {
+      "id": 2,
+      "title": "Digital Dreams",
+      "artist": "Synth Wave",
+      "desc": "Electronic beats for focus and study.",
+      "videoId": "ZV0yXet6D5w",
+      "duration": "4:12"
+    },
+    {
+      "id": 3,
+      "title": "Chilled Moments",
+      "artist": "Jazz Collective",
+      "desc": "Relaxing jazz for after-school relaxation.",
+      "videoId": "7qiZGWVJT3s",
+      "duration": "5:30"
+    },
+    {
+      "id": 4,
+      "title": "Remix Reality",
+      "artist": "DJ Echo",
+      "desc": "High-energy remixes of your favorite songs.",
+      "videoId": "BJlW9jzrwSE",
+      "duration": "3:58"
+    }
+  ],
+  "games": [
+    {
+      "id": 1,
+      "title": "Code Quest",
+      "desc": "Learn coding through an interactive adventure game.",
+      "category": "Educational",
+      "rating": 4.8
+    },
+    {
+      "id": 2,
+      "title": "Math Battles",
+      "desc": "Compete with friends in math challenges.",
+      "category": "Educational",
+      "rating": 4.6
+    },
+    {
+      "id": 3,
+      "title": "Brain Puzzles",
+      "desc": "Test your logic with engaging puzzle games.",
+      "category": "Puzzle",
+      "rating": 4.7
+    },
+    {
+      "id": 4,
+      "title": "Trivia Champion",
+      "desc": "Challenge your knowledge across multiple topics.",
+      "category": "Quiz",
+      "rating": 4.9
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "title": "Gaming Tournament",
+      "date": "2024-05-15",
+      "time": "3:00 PM",
+      "desc": "School-wide esports competition.",
+      "location": "Auditorium"
+    },
+    {
+      "id": 2,
+      "title": "Talent Show",
+      "date": "2024-05-22",
+      "time": "4:00 PM",
+      "desc": "Showcase your talents on stage.",
+      "location": "Main Hall"
+    },
+    {
+      "id": 3,
+      "title": "Movie Night",
+      "date": "2024-05-29",
+      "time": "6:00 PM",
+      "desc": "Free screening of latest student-picked film.",
+      "location": "Gymnasium"
+    },
+    {
+      "id": 4,
+      "title": "Music Festival",
+      "date": "2024-06-05",
+      "time": "5:00 PM",
+      "desc": "Live performances by student bands.",
+      "location": "Outdoor Arena"
+    }
+  ]
+}
