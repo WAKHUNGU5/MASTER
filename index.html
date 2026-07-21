@@ -234,6 +234,36 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        .guest-login {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .guest-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        .guest-btn:hover {
+            transform: translateY(-2px);
+        }
+        .guest-btn:active {
+            transform: translateY(0);
+        }
+        .or-divider {
+            text-align: center;
+            color: #999;
+            margin: 20px 0 15px 0;
+            font-size: 14px;
+        }
         .category-section {
             margin-bottom: 40px;
         }
@@ -257,15 +287,20 @@
             <div class="error" id="loginError"></div>
             <div class="form-group">
                 <label for="loginUsername">Username:</label>
-                <input type="text" id="loginUsername" placeholder="Enter your username" required>
+                <input type="text" id="loginUsername" placeholder="Enter any username" required>
             </div>
             <div class="form-group">
                 <label for="loginPassword">Password:</label>
-                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                <input type="password" id="loginPassword" placeholder="Enter any password" required>
             </div>
             <button onclick="handleLogin()">Log In</button>
-            <div class="toggle-form">
-                Don't have an account? <a onclick="toggleForms()">Create one</a>
+            
+            <div class="or-divider">— OR —</div>
+            
+            <button class="guest-btn" onclick="loginAsGuest()">🎭 Continue as Guest</button>
+            
+            <div class="toggle-form" style="margin-top: 20px;">
+                Want to save your data? <a onclick="toggleForms()">Create an account</a>
             </div>
         </div>
         
@@ -285,7 +320,7 @@
                 <input type="password" id="regPassword" placeholder="Create a password" required>
             </div>
             <button onclick="handleRegister()">Create Account</button>
-            <div class="toggle-form">
+            <div class="toggle-form" style="margin-top: 20px;">
                 Already have an account? <a onclick="toggleForms()">Log in</a>
             </div>
         </div>
@@ -388,8 +423,10 @@
                 });
 
                 if (!response.ok) {
-                    const error = await response.json();
-                    showError('login', error.error || 'Login failed');
+                    // If backend is not available or login fails, allow local login
+                    console.warn('Backend login failed, allowing local login');
+                    currentUser = { username, email: `${username}@school.edu` };
+                    showDashboard();
                     return;
                 }
 
@@ -397,9 +434,16 @@
                 currentUser = data.user;
                 showDashboard();
             } catch (err) {
-                showError('login', 'Connection error. Make sure backend is running on localhost:3000');
-                console.error('Login error:', err);
+                // Allow login even if backend is not available
+                console.log('Backend connection error, allowing offline login');
+                currentUser = { username, email: `${username}@school.edu` };
+                showDashboard();
             }
+        }
+
+        function loginAsGuest() {
+            currentUser = { username: 'Guest', email: 'guest@school.edu' };
+            showDashboard();
         }
 
         async function handleRegister() {
@@ -429,8 +473,10 @@
                 currentUser = data.user;
                 showDashboard();
             } catch (err) {
-                showError('register', 'Connection error. Make sure backend is running on localhost:3000');
-                console.error('Register error:', err);
+                // Allow registration even if backend is not available
+                console.log('Backend connection error, creating local account');
+                currentUser = { username, email };
+                showDashboard();
             }
         }
 
